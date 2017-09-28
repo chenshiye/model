@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:tx="http://www.springframework.org/schema/tx"   
+		xmlns:util="http://www.springframework.org/schema/util" 
+		xmlns:aop="http://www.springframework.org/schema/aop"  
+		xmlns:mvc="http://www.springframework.org/schema/mvc"        
+    	xsi:schemaLocation="http://www.springframework.org/schema/beans        
+    						http://www.springframework.org/schema/beans/spring-beans-3.2.xsd        
+    						http://www.springframework.org/schema/context        
+   							http://www.springframework.org/schema/context/spring-context-3.2.xsd
+   							http://www.springframework.org/schema/tx    
+          					http://www.springframework.org/schema/tx/spring-tx-3.2.xsd 
+     						http://www.springframework.org/schema/aop 
+     						http://www.springframework.org/schema/aop/spring-aop-3.2.xsd 
+   							http://www.springframework.org/schema/mvc  
+						    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+
+	<!-- 引用*.properties属性文件 -->
+	<bean id="porpertyLoder" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="locations">
+			<list>
+				<value>classpath:application.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+        <property name="properties" ref="porpertyLoder" />
+    </bean>
+    
+	<!-- 自动扫描注解的bean -->  	
+	<context:component-scan base-package="com.model" />
+	
+	<context:annotation-config />
+	
+	<mvc:annotation-driven />
+	
+	<!-- 配置数据源 -->  	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		<property name="initialSize" value="${initSize}"/>
+		<property name="maxActive" value="${maxSize}"/>
+		<property name="timeBetweenEvictionRunsMillis" value="60000"/>
+		<property name="minEvictableIdleTimeMillis" value="1800000"/>
+		<property name="poolPreparedStatements" value="true"/>
+		<property name="testWhileIdle" value="true"/>
+		<property name="validationQuery" value="select 1"/>
+	</bean>
+	<!-- 配置Mybatis的文件 ，mapperLocations配置**Mapper.xml文件位置，configLocation配置mybatis-config文件位置-->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml"/>
+		<property name="mapperLocations" value="classpath*:daos/**/*Mapper.xml" />
+		<!-- <property name="mapperLocations">
+			<list>
+				<value>classpath:com/degal/police/**/dao/*Mapper.xml</value>
+			</list>
+		</property> -->
+	</bean>
+	<!-- 配置扫描dao接口 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.model" />
+	</bean>
+	
+	
+	<tx:annotation-driven transaction-manager="sitdbTxManager"/>
+</beans>
