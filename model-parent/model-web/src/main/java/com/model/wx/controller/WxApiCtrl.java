@@ -44,6 +44,8 @@ public class WxApiCtrl {
 		}
 		
 		return "error";
+
+
 	}
 
 	
